@@ -39,7 +39,6 @@ export default function Profile() {
 
   const saveChanges = async () => {
     if (validateProfile()) {
-      console.log({ firstName, lastName }); // Log the values
       try {
         const response = await apiClient.post(
           UPDATE_PROFILE,
@@ -48,7 +47,6 @@ export default function Profile() {
         );
   
         if (response.status === 200 && response.data) {
-          console.log("Updated profile data:", response.data); // Check if lastName is returned
           setUserInfo({ ...response.data });
           toast.success("Profile Updated Successfully");
           navigate("/chat");

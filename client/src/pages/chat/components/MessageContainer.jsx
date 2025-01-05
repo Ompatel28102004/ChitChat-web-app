@@ -85,7 +85,7 @@ const MessageContainer = () => {
         getChannelMessages();
       }
     }
-  }, [selectedChatData, selectedChatMessages,selectedChatType, setSelectedChatMessages]);
+  }, [selectedChatData,selectedChatType, setSelectedChatMessages]);
 
   useEffect(() => {
     if (scrollRef.current && selectedChatMessages.length > 0) {

@@ -35,15 +35,12 @@ const setupSocket = (server) => {
                 .populate("recipient", "id email firstName lastName image color")
                 .exec();
 
-            // Emit to the sender
-            if (senderSocketId) {
-                io.to(senderSocketId).emit("receiveMessage", messageData);
-            }
-
-            // Emit to the recipient if they are online
-            if (recipientSocketId) {
-                io.to(recipientSocketId).emit("receiveMessage", messageData);
-            }
+                if (senderSocketId) {
+                    io.to(senderSocketId).emit("receiveMessage", messageData);
+                }
+                if (recipientSocketId) {
+                    io.to(recipientSocketId).emit("receiveMessage", messageData);
+                }
         } catch (error) {
             console.error("Error sending message:", error);
         }
@@ -52,42 +49,55 @@ const setupSocket = (server) => {
     const sendChannelMessage = async (message) => {
         try {
             const { channelId, sender, content, messageType, fileUrl } = message;
-
+    
+            // Create a new message in the database
             const createdMessage = await Message.create({
                 sender,
                 recipient: null,
                 content,
                 messageType,
-                Timestamp: new Date(),
+                Timestamp: new Date(), // Ensure consistent casing for timestamps
                 fileUrl,
             });
-
+    
+            // Fetch the newly created message with populated sender details
             const messageData = await Message.findById(createdMessage._id)
                 .populate("sender", "id email firstName lastName image color")
                 .exec();
-
-            // Update the channel with the new message
+    
+            // Update the channel with the new message and last message details
             await Channel.findByIdAndUpdate(channelId, {
                 $push: { messages: createdMessage._id },
                 lastMessage: content,
-                lastMessageTime: createdMessage.Timestamp
+                lastMessageTime: createdMessage.Timestamp,
             });
-
+    
+            // Find the channel and populate its members
             const channel = await Channel.findById(channelId).populate("members");
-
+    
+            // Prepare the final data to send via socket
             const finalData = { ...messageData._doc, channelId: channel._id };
+    
+            // Emit the message to all channel members
             if (channel && channel.members) {
                 channel.members.forEach((member) => {
                     const memberSocketId = userSocketMap.get(member._id.toString());
+                    // console.log(`Member ID: ${member._id}, Socket ID: ${memberSocketId}`);
                     if (memberSocketId) {
                         io.to(memberSocketId).emit("receive-channel-message", finalData);
                     }
                 });
             }
+            if (channel && channel.admin) {
+                const memberSocketId = userSocketMap.get(channel.admin._id.toString());
+                // console.log(`Member ID: ${channel.admin._id}, Socket ID: ${memberSocketId}`);
+                io.to(memberSocketId).emit("receive-channel-message", finalData);
+            }
         } catch (error) {
             console.error("Error sending channel message:", error);
         }
     };
+    
 
     const handleTyping = (data) => {
         const { chatId, userId } = data;
