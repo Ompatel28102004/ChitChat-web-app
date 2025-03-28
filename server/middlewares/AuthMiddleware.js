@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 
 export const verifyToken = (request, response, next) => {
     const token = request.cookies.jwt; // Access the JWT from cookies
-    console.log("token:",request);
     if (!token) {
         console.log('No token found in cookies.');
         return response.status(401).send("You are not authenticated!");
