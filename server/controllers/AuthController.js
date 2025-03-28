@@ -8,11 +8,17 @@ const createToken = (email, userId) => {
 };
 
 // Set cookie options
+// const cookieOptions = {
+//     maxAge: maxAge * 1000,  // maxAge is in milliseconds for cookies
+//     httpOnly: true,         // Helps prevent client-side JavaScript from accessing the token
+//     secure: process.env.NODE_ENV === 'production',  // Use secure cookies in production (HTTPS)
+//     sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',  // Allow cross-site cookies in production
+// };
 const cookieOptions = {
     maxAge: maxAge * 1000,  // maxAge is in milliseconds for cookies
-    httpOnly: true,         // Helps prevent client-side JavaScript from accessing the token
-    secure: process.env.NODE_ENV === 'production',  // Use secure cookies in production (HTTPS)
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',  // Allow cross-site cookies in production
+    httpOnly: true,
+    secure: true,  // Set to false if using localhost (but must be true for HTTPS)
+    sameSite: "None", // Required for cross-origin requests
 };
 
 export const signup = async (request, response, next) => {
