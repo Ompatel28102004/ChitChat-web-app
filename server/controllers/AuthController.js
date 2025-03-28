@@ -11,8 +11,8 @@ const createToken = (email, userId) => {
 const cookieOptions = {
     maxAge: maxAge * 1000,  // maxAge is in milliseconds for cookies
     httpOnly: true,         // Helps prevent client-side JavaScript from accessing the token
-    secure: true,  // Use secure cookies in production (HTTPS)
-    sameSite:"None",  // Allow cross-site cookies in production
+    secure: process.env.NODE_ENV === 'production',  // Use secure cookies in production (HTTPS)
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',  // Allow cross-site cookies in production
 };
 
 export const signup = async (request, response, next) => {
