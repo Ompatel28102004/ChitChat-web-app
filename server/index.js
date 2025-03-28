@@ -32,11 +32,6 @@ app.use(express.json());
 // Serve static files from the 'uploads/files' directory
 app.use('/uploads/files', express.static(path.join(__dirname, 'uploads', 'files')));
 
-app.use((req, res, next) => {
-    console.log("Cookies received:", req.cookies); // Logs all cookies
-    next();
-});
-
 // Define routes
 app.use("/api/auth", authRoutes);
 app.use("/api/contacts", contactsRoutes);
